@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitScan</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="header-left">
+                <h1>GitScan - Secure Your Code</h1>
+                <form id="analyze-form">
+                    <input type="text" id="github-url" name="githubUrl" placeholder="Enter GitHub Repository URL" required>
+                    <button type="submit">Analyze Repository</button>
+                </form>
+            </div>
+
+        </header>
+
+        <div class="horizontal-bar">
+            <!-- Community Score Block -->
+            <div class="score-block">
+                <div class="score-circle">
+                    <p id="community-score">0</p>
+                    <span>/ 96</span>
+                </div>
+                <p>Community Score</p>
+            </div>
+        
+            <!-- Details Section -->
+            <div class="details-block">
+                <div class="details-row">
+                    <span class="details-status" id="security-status">No algorithm flagged this Repository as malicious</span>
+                </div>
+                <div class="details-row">
+                    <span id="repo-url">https://github.com/example/repo</span>
+                </div>
+                <div class="details-row">
+                    <span class="badge">text/html</span>
+                    <span class="badge">external-resources</span>
+                    <span class="badge">contains-zip</span>
+                </div>
+                <div class="details-row">
+                    <span>Status: <strong>200</strong></span>
+                    <span>Content type: <strong>text/html; charset=utf-8</strong></span>
+                    <span>Last Analysis Date: <strong>5 days ago</strong></span>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <section class="file-analysis">
+            <h2>File Analysis</h2>
+            <table id="file-analysis-table">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Size (KB)</th>
+                        <th>Language</th>
+                    </tr>
+                </thead>
+                <tbody id="file-rows">
+                    <!-- Dynamically populated -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Modal for OpenAI Analysis -->
+        <div id="analysis-modal" class="modal">
+            <div class="modal-content">
+                <span id="close-modal">&times;</span>
+                <h2>File Analysis</h2>
+                <p id="analysis-text">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('analyze-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+        
+            const githubUrl = document.getElementById('github-url').value;
+        
+            try {
+                const res = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ githubUrl }),
+                });
+        
+                const data = await res.json();
+                const rows = document.getElementById('file-rows');
+                const modal = document.getElementById('analysis-modal');
+                const analysisText = document.getElementById('analysis-text');
+                const closeModal = document.getElementById('close-modal');
+        
+                if (data.success) {
+                    // Update Community Score
+                    document.getElementById('community-score').innerText = data.metrics.securityRating || 0;
+        
+                    // Update Security Status
+                    document.getElementById('security-status').innerText =
+                        data.metrics.securityStatus || "No security vendors flagged this URL as malicious";
+        
+                    // Update Repository URL
+                    document.getElementById('repo-url').innerText = githubUrl;
+        
+                    // Update Badges
+                    const badges = data.metrics.fileTypes || {};
+                    const badgeContainer = document.querySelector('.details-row:nth-child(3)');
+                    badgeContainer.innerHTML = Object.keys(badges)
+                        .map(type => `<span class="badge">${type}</span>`)
+                        .join('');
+        
+                    // Update Other Details
+                    document.querySelector('.details-row:nth-child(4)').innerHTML = `
+                        <span>Status: <strong>200</strong></span>
+                        <span>Content type: <strong>text/html; charset=utf-8</strong></span>
+                        <span>Last Analysis Date: <strong>5 days ago</strong></span>
+                    `;
+        
+                    // Populate File Analysis Table
+                    rows.innerHTML = data.report.map((result, index) => `
+                        <tr data-index="${index}">
+                            <td>${result.filePath || 'Unknown'}</td>
+                            <td>${result.filePath.split('.').pop() || 'Unknown'}</td>
+                            <td>${result.analysis ? 'Clean' : 'Skipped'}</td>
+                            <td>${(result.size || 0).toFixed(2)}</td>
+                            <td>${result.language || 'Unknown'}</td>
+                        </tr>
+                    `).join('');
+        
+                    // Add click event to table rows for modal
+                    rows.querySelectorAll('tr').forEach(row => {
+                        row.addEventListener('click', () => {
+                            const index = row.getAttribute('data-index');
+                            analysisText.innerText = data.report[index].analysis || "No analysis available.";
+                            modal.style.display = 'flex';
+                        });
+                    });
+        
+                    // Close Modal
+                    closeModal.addEventListener('click', () => {
+                        modal.style.display = 'none';
+                    });
+        
+                    window.addEventListener('click', (event) => {
+                        if (event.target === modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                } else {
+                    rows.innerHTML = `<tr><td colspan="5" class="error">${data.message}</td></tr>`;
+                }
+            } catch (error) {
+                console.error("Error analyzing the repository:", error.message);
+            }
+        });
+        </script>
+        
+</body>
+</html>

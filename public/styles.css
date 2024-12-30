@@ -45,7 +45,7 @@ body {
 
 button {
     padding: 10px 20px;
-    background-color: #180076;
+    background-color: #948bfc;
     color: white;
     border: none;
     border-radius: 4px;
@@ -54,7 +54,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #948bfc;
 }
 
 .header-right {

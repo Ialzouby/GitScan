@@ -5,78 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitScan</title>
     <link rel="icon" type="image/png" href="/git-scan.png">
-
     <link rel="stylesheet" href="/styles.css">
-
 </head>
 <body>
     <div class="app-container">
-        <header class="header">
+        <!-- Header with the search bar -->
+        <header id="header" class="header centered">
             <div class="header-left">
-                <h1>GitScan - Secure Your Code</h1>
+                <h1 id="header-text">GitScan - Secure Your Code</h1>
                 <form id="analyze-form">
                     <input type="text" id="github-url" name="githubUrl" placeholder="Enter GitHub Repository URL" required>
                     <button type="submit">Analyze Repository</button>
                 </form>
             </div>
-
         </header>
-
-        <div class="horizontal-bar">
-            <!-- Community Score Block -->
-            <div class="score-block">
-                <div class="score-circle">
-                    <p id="community-score">0</p>
-                    <span>/ 96</span>
-                </div>
-                <p>Community Score</p>
-            </div>
         
-            <!-- Details Section -->
-            <div class="details-block">
-                <div class="details-row">
-                    <span class="details-status" id="security-status">No algorithm flagged this Repository as malicious</span>
+        
+
+                <!-- Loading Spinner -->
+                <div id="loading-spinner" class="loading-spinner" style="display: none;">
+                    <div class="spinner"></div>
+                <div>Please allow up to a minute as we retrieve and analyze the repository using our advanced, state-of-the-art algorithm. Thank you for your patience.</div>
                 </div>
-                <div class="details-row">
-                    <span id="repo-url">https://github.com/example/repo</span>
+
+        <!-- Hidden Content Wrapper -->
+        <div id="content-wrapper" style="display: none;">
+            <div class="horizontal-bar">
+                <!-- Community Score Block -->
+                <div class="score-block">
+                    <div class="score-circle">
+                        <p id="community-score">0</p>
+                        <span>/ 96</span>
+                    </div>
+                    <p>Community Score</p>
                 </div>
-                <div class="details-row">
-                    <span class="badge">text/html</span>
-                    <span class="badge">external-resources</span>
-                    <span class="badge">contains-zip</span>
-                </div>
-                <div class="details-row">
-                    <span>Status: <strong>200</strong></span>
-                    <span>Content type: <strong>text/html; charset=utf-8</strong></span>
-                    <span>Last Analysis Date: <strong>5 days ago</strong></span>
+            
+                <!-- Details Section -->
+                <div class="details-block">
+                    <div class="details-row">
+                        <span class="details-status" id="repo-title">Repository Title</span>
+                    </div>
+                    <div class="details-row">
+                        <span id="repo-url"></span>
+                    </div>
+                    <div class="details-row" id="file-types">
+                        <!-- File types badges dynamically populated -->
+                    </div>
+                    <div class="details-row">
+                        <span>Status: <strong id="status-code"></strong></span>
+                        <span>Content type: <strong id="content-type"></strong></span>
+                        <span>Last Analysis Date: <strong id="last-analysis"></strong></span>
+                    </div>
                 </div>
             </div>
+            
+            <section class="file-analysis">
+                <h2>File Analysis</h2>
+                <table id="file-analysis-table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Size (KB)</th>
+                            <th>Language</th>
+                        </tr>
+                    </thead>
+                    <tbody id="file-rows">
+                        <!-- Dynamically populated -->
+                    </tbody>
+                </table>
+            </section>
         </div>
-        
-        
-
-        <section class="file-analysis">
-            <h2>File Analysis</h2>
-            <table id="file-analysis-table">
-                <thead>
-                    <tr>
-                        <th>File Name</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Size (KB)</th>
-                        <th>Language</th>
-                    </tr>
-                </thead>
-                <tbody id="file-rows">
-                    <!-- Dynamically populated -->
-                </tbody>
-            </table>
-        </section>
 
         <!-- Modal for OpenAI Analysis -->
         <div id="analysis-modal" class="modal">
             <div class="modal-content">
-                <span id="close-modal">&times;</span>
+                <span id="close-modal" class="close-button">&times;</span>
                 <h2>File Analysis</h2>
                 <p id="analysis-text">Loading...</p>
             </div>
@@ -84,87 +89,111 @@
     </div>
 
     <script>
-        document.getElementById('analyze-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-        
-            const githubUrl = document.getElementById('github-url').value;
-        
-            try {
-                const res = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ githubUrl }),
-                });
-        
-                const data = await res.json();
-                const rows = document.getElementById('file-rows');
-                const modal = document.getElementById('analysis-modal');
-                const analysisText = document.getElementById('analysis-text');
-                const closeModal = document.getElementById('close-modal');
-        
-                if (data.success) {
-                    // Update Community Score
-                    document.getElementById('community-score').innerText = data.metrics.securityRating || 0;
-        
-                    // Update Security Status
-                    document.getElementById('security-status').innerText =
-                        data.metrics.securityStatus || "No security vendors flagged this URL as malicious";
-        
-                    // Update Repository URL
-                    document.getElementById('repo-url').innerText = githubUrl;
-        
-                    // Update Badges
-                    const badges = data.metrics.fileTypes || {};
-                    const badgeContainer = document.querySelector('.details-row:nth-child(3)');
-                    badgeContainer.innerHTML = Object.keys(badges)
-                        .map(type => `<span class="badge">${type}</span>`)
-                        .join('');
-        
-                    // Update Other Details
-                    document.querySelector('.details-row:nth-child(4)').innerHTML = `
-                        <span>Status: <strong>200</strong></span>
-                        <span>Content type: <strong>text/html; charset=utf-8</strong></span>
-                        <span>Last Analysis Date: <strong>5 days ago</strong></span>
-                    `;
-        
-                    // Populate File Analysis Table
-                    rows.innerHTML = data.report.map((result, index) => `
-                        <tr data-index="${index}">
-                            <td>${result.filePath || 'Unknown'}</td>
-                            <td>${result.filePath.split('.').pop() || 'Unknown'}</td>
-                            <td>${result.analysis ? 'Clean' : 'Skipped'}</td>
-                            <td>${(result.size || 0).toFixed(2)}</td>
-                            <td>${result.language || 'Unknown'}</td>
-                        </tr>
-                    `).join('');
-        
-                    // Add click event to table rows for modal
-                    rows.querySelectorAll('tr').forEach(row => {
-                        row.addEventListener('click', () => {
-                            const index = row.getAttribute('data-index');
-                            analysisText.innerText = data.report[index].analysis || "No analysis available.";
-                            modal.style.display = 'flex';
-                        });
-                    });
-        
-                    // Close Modal
-                    closeModal.addEventListener('click', () => {
-                        modal.style.display = 'none';
-                    });
-        
-                    window.addEventListener('click', (event) => {
-                        if (event.target === modal) {
-                            modal.style.display = 'none';
-                        }
-                    });
-                } else {
-                    rows.innerHTML = `<tr><td colspan="5" class="error">${data.message}</td></tr>`;
-                }
-            } catch (error) {
-                console.error("Error analyzing the repository:", error.message);
-            }
+document.getElementById('analyze-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const headerText = document.getElementById('header-text');
+    if (headerText) {
+        headerText.style.display = 'none';
+    }
+
+    const githubUrl = document.getElementById('github-url').value;
+    const repoMatch = /github\.com\/([^\/]+)\/([^\/]+)/.exec(githubUrl);
+    if (!repoMatch) {
+        alert('Invalid GitHub URL. Please enter a valid repository URL.');
+        return;
+    }
+
+    const [_, owner, repo] = repoMatch;
+
+    // Show the loading spinner
+    document.getElementById('loading-spinner').style.display = 'flex';
+
+    try {
+        // Fetch repository analysis data from your backend
+        const res = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ githubUrl }),
         });
-        </script>
-        
+
+        const data = await res.json();
+
+        if (data.success) {
+            // Fetch repository metadata from the GitHub API
+            const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+            const repoData = await repoRes.json();
+
+            // Update the repository title
+            document.getElementById('repo-title').innerText = repoData.full_name || 'Unknown Repository';
+
+            // Update Community Score
+            document.getElementById('community-score').innerText = data.metrics.securityRating || 0;
+
+            // Update Repository URL
+            document.getElementById('repo-url').innerText = githubUrl;
+
+            // Update File Types
+            const fileTypesContainer = document.getElementById('file-types');
+            fileTypesContainer.innerHTML = Object.keys(data.metrics.fileTypes || {})
+                .map(type => `<span class="badge">${type}</span>`)
+                .join('');
+
+            // Update Status, Content Type, Last Analysis
+            document.getElementById('status-code').innerText = data.metrics.status || 'Unknown';
+            document.getElementById('content-type').innerText = data.metrics.contentType || 'Unknown';
+            document.getElementById('last-analysis').innerText = data.metrics.lastAnalysisDate || 'Unknown';
+
+            // Populate File Analysis Table
+            const rows = document.getElementById('file-rows');
+            rows.innerHTML = data.report.map((file, index) => `
+                <tr data-index="${index}">
+                    <td>${file.filePath || 'Unknown'}</td>
+                    <td>${file.filePath.split('.').pop() || 'Unknown'}</td>
+                    <td>${file.analysis ? 'Clean' : 'Skipped'}</td>
+                    <td>${(file.size || 0).toFixed(2)}</td>
+                    <td>${file.language || 'Unknown'}</td>
+                </tr>
+            `).join('');
+
+            // Add click event to rows for popup
+            rows.querySelectorAll('tr').forEach(row => {
+                row.addEventListener('click', () => {
+                    const index = row.getAttribute('data-index');
+                    const analysis = data.report[index].analysis || "No analysis available.";
+                    document.getElementById('analysis-text').innerText = analysis;
+                    document.getElementById('analysis-modal').style.display = 'flex';
+                });
+            });
+
+            // Close Modal
+            const closeModal = document.getElementById('close-modal');
+            closeModal.addEventListener('click', () => {
+                document.getElementById('analysis-modal').style.display = 'none';
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                const modal = document.getElementById('analysis-modal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // Hide the loading spinner and display the content
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('header').classList.remove('centered');
+            document.getElementById('content-wrapper').style.display = 'block';
+        } else {
+            console.error(data.message);
+            document.getElementById('loading-spinner').style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Error analyzing the repository:", error.message);
+        document.getElementById('loading-spinner').style.display = 'none';
+    }
+});
+
+    </script>
 </body>
 </html>

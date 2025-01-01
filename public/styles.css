@@ -848,15 +848,18 @@ button:hover {
     }
 
     #github-url {
-        width: 90%;
+        width: 80%;
         padding: 12px;
         font-size: 14px;
+        margin-left: 35px;
     }
 
     button {
         width: 90%;
         padding: 12px;
         font-size: 14px;
+        margin-left: 25px;
+
     }
 
     /* Floating Images Adjustments */

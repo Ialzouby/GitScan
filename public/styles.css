@@ -803,3 +803,139 @@ button:hover {
     height: auto; /* Maintain aspect ratio */
     z-index: -1; /* Ensure it appears behind other elements */
 }
+
+@media (max-width: 768px) {
+    /* General Container Adjustments */
+    .app-container {
+        padding: 10px;
+    }
+
+    /* Header Styling for Mobile */
+    .header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .header-left {
+        flex: none;
+        width: 100%;
+        height: auto;
+    }
+
+    .header-text {
+        font-size: 18px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .search-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    #gitscan-logo {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 10px;
+    }
+
+    #analyze-form {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #github-url {
+        width: 90%;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    button {
+        width: 90%;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    /* Floating Images Adjustments */
+    .floating-image {
+        display: none; /* Hide floating images on mobile for simplicity */
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 6px;
+    }
+
+    /* Community Score Adjustments */
+    .score-block {
+        width: 80px;
+        height: 80px;
+    }
+
+
+
+    #community-score {
+        font-size: 18px;
+    }
+
+    .community-score-label {
+        font-size: 14px;
+    }
+
+    /* File Analysis Table */
+    .file-analysis {
+        margin-top: 10px;
+    }
+
+    .file-analysis table {
+        font-size: 12px;
+    }
+
+    .file-analysis th, .file-analysis td {
+        padding: 8px;
+    }
+
+    /* Details Section */
+    .details-block {
+        gap: 5px;
+    }
+
+    .details-row {
+        flex-wrap: wrap;
+    }
+
+    .details-status {
+        font-size: 14px;
+    }
+
+    .badge {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+
+    /* Modal Adjustments */
+    .modal-content {
+        width: 90%;
+        padding: 15px;
+    }
+
+    /* Adjust Scores Circle */
+    .score-circle {
+        width: 100px;
+        height: 100px;
+    }
+
+    .score-text {
+        font-size: 14px;
+    }
+}

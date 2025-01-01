@@ -23,6 +23,7 @@ body {
 
 .header-left {
     flex: 2;
+    height: 100px;
 }
 
 .header h1 {
@@ -220,25 +221,6 @@ body {
     text-align: center;
 }
 
-.score-circle {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-}
-
-.score-circle p {
-    font-size: 32px;
-    font-weight: bold;
-    color: #00C8FF;
-    margin: 0;
-}
-
-.score-circle span {
-    font-size: 14px;
-    color: #aaa;
-}
 
 .score-block p {
     margin: 0;
@@ -322,6 +304,7 @@ body {
     background: #1e1e1e;
     padding: 10px 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    height: 100px;
 }
 
 /* Input Form */
@@ -455,4 +438,208 @@ input, button {
     background-color: #1e1e1e;
     padding: 20px;
     border-radius: 10px;
+}
+
+.intro-text {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #aaa;
+    text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.progress-ring {
+    transform: rotate(-90deg); /* Ensures progress starts at the top */
+    margin-top: -30px;
+    margin-left: -7px;
+}
+
+.progress-ring__background,
+.progress-ring__circle {
+    fill: none;
+    stroke-width: 10; /* Match this with the `r` calculation */
+}
+
+.progress-ring__background {
+    stroke: #ccc; /* Background stroke color */
+}
+
+
+.score-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+
+
+.progress-ring {
+    position: relative;
+    z-index: 1; /* Ensure it is below the text */
+}
+
+.progress-ring__circle {
+    stroke-linecap: round;
+    stroke: green; /* Default stroke color */
+    stroke-dasharray: 377; /* Circumference: 2 * π * 60 */
+    stroke-dashoffset: 377; /* Initially full offset */
+    transition: stroke-dashoffset 0.5s, stroke 0.5s;
+}
+
+.score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2; /* Keep text on top */
+}
+
+#community-score {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+}
+
+.score-text span {
+    font-size: 12px;
+    color: #aaa; /* Adjust color for the "/ 96" part */
+}
+
+
+/* Score Wrapper */
+.score-wrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+/* Progress Ring */
+.progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.progress-ring-background,
+.progress-ring-progress {
+    fill: none;
+    stroke-width: 10;
+}
+
+.progress-ring-background {
+    stroke: #ccc; /* Background stroke */
+}
+
+.progress-ring-progress {
+    stroke: #00ff88; /* Default progress color */
+    stroke-linecap: round;
+    stroke-dasharray: 377; /* Circumference: 2 * π * r */
+    stroke-dashoffset: 377; /* Full circle offset initially */
+    transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+}
+
+/* Centered Score Text */
+.score-text {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+#score-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1;
+}
+
+.score-text span {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.community-score-label {
+    margin-top: 50px; /* Adjust the spacing below the circle */
+    font-size: 16px;
+    color: white;
+}
+
+#file-analysis-table {
+    width: 100%;
+    border-collapse: collapse; /* Ensure borders don't overlap */
+    margin-top: 10px;
+}
+
+#file-analysis-table th {
+    background: #948bfc; /* Header background color */
+    color: white; /* Text color */
+    font-weight: bold;
+    padding: 10px;
+    text-align: left;
+    border: none;
+}
+
+#file-analysis-table th:first-child {
+    border-top-left-radius: 10px; /* Top-left corner rounded */
+}
+
+#file-analysis-table th:last-child {
+    border-top-right-radius: 10px; /* Top-right corner rounded */
+}
+
+#file-analysis-table td {
+    padding: 10px;
+    border: 1px solid #333; /* Cell border color */
+    text-align: left;
+}
+
+#file-analysis-table tr:nth-child(even) {
+    background: #1E1E1E; /* Alternating row background color */
+}
+
+#file-analysis-table tr:hover {
+    background: #333; /* Highlight on hover */
+    cursor: pointer;
+}
+
+/* Repository Title Styling */
+#repo-title {
+    font-size: 24px; /* Larger font size */
+    font-weight: bold; /* Bold text */
+    color: #fcfcfc; /* Adjust color as needed */
+    display: block; /* Ensures it takes its own line */
+    margin-bottom: -10px;
+}
+
+/* Repository URL Styling */
+#repo-url {
+    font-size: 16px; /* Medium font size */
+    color: #948bfc; /* Link color */
+    text-decoration: none; /* Remove underline */
+    transition: color 0.3s ease; /* Smooth color transition */
+    word-break: break-word; /* Break long URLs */
+}
+
+#repo-url:hover {
+    color: #7b6ce6; /* Change color on hover */
+    text-decoration: underline; /* Add underline on hover */
+}
+
+/* Details Row Styling */
+.details-row {
+    margin-bottom: 10px; /* Add spacing between rows */
 }

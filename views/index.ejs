@@ -34,29 +34,40 @@
                 <!-- Community Score Block -->
                 <div class="score-block">
                     <div class="score-circle">
+                        <svg class="progress-ring" width="160" height="160">
+                            <circle class="progress-ring__background" cx="80" cy="80" r="75" />
+                            <circle class="progress-ring__circle" cx="80" cy="80" r="75" />
+                            
+                        </svg>
+                        <div class="score-text">
                         <p id="community-score">0</p>
                         <span>/ 96</span>
                     </div>
-                    <p>Community Score</p>
                 </div>
+                <p class="community-score-label">Community Score</p>
+
+            </div>
+                
             
                 <!-- Details Section -->
-                <div class="details-block">
-                    <div class="details-row">
-                        <span class="details-status" id="repo-title">Repository Title</span>
-                    </div>
-                    <div class="details-row">
-                        <span id="repo-url"></span>
-                    </div>
-                    <div class="details-row" id="file-types">
-                        <!-- File types badges dynamically populated -->
-                    </div>
-                    <div class="details-row">
-                        <span>Status: <strong id="status-code"></strong></span>
-                        <span>Content type: <strong id="content-type"></strong></span>
-                        <span>Last Analysis Date: <strong id="last-analysis"></strong></span>
-                    </div>
-                </div>
+<!-- Details Section -->
+<div class="details-block">
+    <div class="details-row">
+        <span class="details-status" id="repo-title">Repository Title</span>
+    </div>
+    <div class="details-row">
+        <a href="#" id="repo-url" target="_blank" rel="noopener noreferrer">Repository URL</a>
+    </div>
+    <div class="details-row" id="file-types">
+        <!-- File types badges dynamically populated -->
+    </div>
+    <div class="details-row">
+        <span>Status: <strong id="status-code"></strong></span>
+        <span>Content type: <strong id="content-type"></strong></span>
+        <span>Last Analysis Date: <strong id="last-analysis"></strong></span>
+    </div>
+</div>
+
             </div>
             
             <section class="file-analysis">
@@ -124,6 +135,11 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
             const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
             const repoData = await repoRes.json();
 
+            const communityScore = data.metrics.communityScore;
+
+            // Update the community score and progress ring
+            updateCommunityScore(communityScore);
+
             // Update the repository title
             document.getElementById('repo-title').innerText = repoData.full_name || 'Unknown Repository';
 
@@ -132,6 +148,8 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
 
             // Update Repository URL
             document.getElementById('repo-url').innerText = githubUrl;
+            document.getElementById('repo-url').href = githubUrl; // Set the href attribute
+
 
             // Update File Types
             const fileTypesContainer = document.getElementById('file-types');
@@ -141,8 +159,17 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
 
             // Update Status, Content Type, Last Analysis
             document.getElementById('status-code').innerText = data.metrics.status || 'Unknown';
-            document.getElementById('content-type').innerText = data.metrics.contentType || 'Unknown';
-            document.getElementById('last-analysis').innerText = data.metrics.lastAnalysisDate || 'Unknown';
+
+// Update the Content Type field
+document.getElementById('content-type').innerText = data.metrics.repositoryType || 'Unknown';
+
+// Add explanation for the safety status
+const statusExplanation = document.createElement('p');
+statusExplanation.innerText = `Explanation: ${data.metrics.statusExplanation || 'No explanation available.'}`;
+document.getElementById('content-wrapper').appendChild(statusExplanation);
+
+// Update Last Analysis Date
+document.getElementById('last-analysis').innerText = data.metrics.lastAnalysisDate || 'N/A';
 
             // Populate File Analysis Table
             const rows = document.getElementById('file-rows');
@@ -193,6 +220,31 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
         document.getElementById('loading-spinner').style.display = 'none';
     }
 });
+
+function updateCommunityScore(score) {
+    const circle = document.querySelector('.progress-ring__circle');
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+
+    // Set circumference and offset
+    circle.style.strokeDasharray = `${circumference}`;
+    circle.style.strokeDashoffset = `${circumference - (score / 96) * circumference}`;
+
+    // Set color based on score
+    if (score >= 70) {
+        circle.style.stroke = 'green';
+    } else if (score >= 40) {
+        circle.style.stroke = 'yellow';
+    } else {
+        circle.style.stroke = 'red';
+    }
+
+    // Update the score text
+    document.getElementById('community-score').innerText = score;
+}
+
+
+
 
     </script>
 </body>

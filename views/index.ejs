@@ -12,12 +12,24 @@
         <!-- Header with the search bar -->
         <header id="header" class="header centered">
             <div class="header-left">
-                <h1 id="header-text">GitScan - Secure Your Code</h1>
-                <form id="analyze-form">
-                    <input type="text" id="github-url" name="githubUrl" placeholder="Enter GitHub Repository URL" required>
-                    <button type="submit">Analyze Repository</button>
-                </form>
+                <!-- Text Above the Search Bar -->
+                <h1 class="header-text" id="header-text">GitScan - Secure Your Code</h1>
+        
+                <!-- Flex Container for Logo and Search Bar -->
+                <div class="search-container">
+                    <!-- Logo -->
+                    <img src="/3.png" alt="GitScan Logo" id="gitscan-logo" class="hidden-logo">
+                    
+                    <!-- Search Form -->
+                    <form id="analyze-form">
+                        <input type="text" id="github-url" name="githubUrl" placeholder="Enter GitHub Repository URL" required>
+                        <button type="submit">Analyze Repository</button>
+                    </form>
+                </div>
             </div>
+            <img src="/1.png" alt="Floating Image 1" class="floating-image" id="image1">
+            <img src="/3.png" alt="Floating Image 3" class="floating-image" id="image3">
+        
         </header>
         
         
@@ -108,6 +120,11 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
         headerText.style.display = 'none';
     }
 
+    document.querySelectorAll('.floating-image').forEach(image => {
+        image.style.display = 'none';
+    });
+    const gitscanLogo = document.getElementById('gitscan-logo');
+
     const githubUrl = document.getElementById('github-url').value;
     const repoMatch = /github\.com\/([^\/]+)\/([^\/]+)/.exec(githubUrl);
     if (!repoMatch) {
@@ -119,6 +136,7 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
 
     // Show the loading spinner
     document.getElementById('loading-spinner').style.display = 'flex';
+
 
     try {
         // Fetch repository analysis data from your backend
@@ -132,10 +150,21 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
 
         if (data.success) {
             // Fetch repository metadata from the GitHub API
+            
+            header.classList.add('processed');
+             
+            gitscanLogo.classList.add('visible');
+
             const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
             const repoData = await repoRes.json();
 
             const communityScore = data.metrics.communityScore;
+
+            window.onload = () => {
+    document.querySelectorAll('.floating-image').forEach(image => {
+        image.style.display = 'block';
+    });
+};
 
             // Update the community score and progress ring
             updateCommunityScore(communityScore);

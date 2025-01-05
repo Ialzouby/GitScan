@@ -13,7 +13,7 @@ function categorizeFiles(filePath) {
     const parsableExtensions = [
         '.js', '.py', '.swift', '.java', '.ts', '.md', '.txt', '.html', '.geojson', '.xml', '.json',
         '.yml', '.yaml', '.csv', '.sql', '.ini', '.conf', '.css', '.scss', '.less', '.rb', '.go',
-        '.php', '.c', '.cpp', '.h', '.sh', '.bat', '.dockerfile'
+        '.php', '.c', '.cpp', '.h', '.sh', '.bat', '.dockerfile', '.terminal',
     ];
 
     const nonParsableExtensions = [
@@ -121,12 +121,24 @@ ${content.slice(0, 8000)}... [Content Truncated if Necessary]
 // Analyze Code with OpenAI
 async function analyzeCode(content, filePath) {
     let prompt = `You are a cybersecurity expert specializing in secure coding practices, vulnerability assessment, and API security.
+    Do not include any #, ##, ### or *, **, *** in your response.
 
-Below is the raw source code provided for analysis. Your task is to:
-1. Identify specific security vulnerabilities in the code. Do not speculate—base your analysis on the provided code only.
-2. Identify any exposed or misconfigured APIs, hardcoded secrets, or insecure practices.
-3. Provide concrete and actionable recommendations to improve the security of the code.
-4. Highlight best practices for secure coding relevant to the provided code.\n\n${content}`;
+Below is the raw source code provided for analysis. Your task is to provide the following in separate sections:
+1. **Security Metrics**: Identify specific security vulnerabilities such as injection attack vulnerabilities, exposed keys, and any insecure practices.
+2. **Function Analysis**: Provide a paragraph describing the function and purpose of the file.
+3. **Security Recommendations**: Offer concrete and actionable recommendations to improve the security of the code.
+
+Please format your response as follows:
+Security Metrics:
+[Your analysis here]
+
+Function Analysis:
+[Your analysis here]
+
+Security Recommendations:
+[Your recommendations here]
+
+\n\n${content}`;
 
     if (filePath.endsWith('.md') || filePath.endsWith('.txt')) {
         prompt = `Analyze the following text file for clarity, grammar, and content quality:\n\n${content}`;
@@ -135,7 +147,7 @@ Below is the raw source code provided for analysis. Your task is to:
     const response = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 300,
+        max_tokens: 500,
     });
 
     return response.choices[0].message.content.trim();
@@ -251,12 +263,14 @@ async function analyzeFiles(categorizedFiles, repoLanguages) {
 
 async function analyzeRepositoryTypeAndStatus(fileSummary) {
     const prompt = `
+
 You are an expert in software repositories and application architecture.
 
 Based on the following summary of a repository, provide:
 1. The type of the repository (e.g., "Node.js Application", "Python Library", "Containerized Application", etc.).
 2. A safety status: "Clean to Use", "Inspect Before Use", or "Not Safe to Use".
 3. A concise explanation for your safety assessment.
+4. A security score out of 96 based on the repository's safety.
 
 Repository Summary:
 - File Types: ${JSON.stringify(fileSummary.fileTypes, null, 2)}
@@ -268,6 +282,11 @@ Answer in the following format:
 Type: [Repository Type]
 Status: [Safety Status]
 Explanation: [Reasoning for the status]
+Security Score: [Numeric Value]
+
+Do not include any # or * in your response.
+
+
 `;
 
     try {
@@ -277,23 +296,25 @@ Explanation: [Reasoning for the status]
             max_tokens: 300,
         });
 
-        // Parse and return the response
         const result = response.choices[0].message.content.trim();
-        const [typeLine, statusLine, explanationLine] = result.split("\n");
+        const [typeLine, statusLine, explanationLine, scoreLine] = result.split("\n");
         const type = typeLine.replace("Type: ", "").trim();
         const status = statusLine.replace("Status: ", "").trim();
         const explanation = explanationLine.replace("Explanation: ", "").trim();
+        const securityScore = parseInt(scoreLine.replace("Security Score: ", "").trim(), 10);
 
-        return { type, status, explanation };
+        return { type, status, explanation, securityScore };
     } catch (error) {
         console.error("Error analyzing repository type and status:", error.message);
         return {
             type: "Unknown",
             status: "Inspect Before Use",
-            explanation: "Unable to determine repository type and safety status."
+            explanation: "Unable to determine repository type and safety status.",
+            securityScore: 0,
         };
     }
 }
+
 
 
 
@@ -383,6 +404,12 @@ router.post('/analyze', async (req, res) => {
 
         const metrics = await analyzeRepo(categorizedFiles);
         const analysis = await analyzeFiles(categorizedFiles, repoLanguages);
+        const repoStatus = await analyzeRepositoryTypeAndStatus(metrics);
+
+        metrics.securityScore = repoStatus.securityScore;
+
+
+        console.log("Community Score:", metrics.communityScore);
 
         res.json({ success: true, metrics, report: analysis });
     } catch (error) {

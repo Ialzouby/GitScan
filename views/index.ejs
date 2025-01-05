@@ -13,7 +13,7 @@
         <header id="header" class="header centered">
             <div class="header-left">
                 <!-- Text Above the Search Bar -->
-                <h1 class="header-text" id="header-text">GitScan - Secure Your Code</h1>
+               <!-- <h1 class="header-text" id="header-text">GitScan - Secure Your Code</h1> --> 
         
                 <!-- Flex Container for Logo and Search Bar -->
                 <div class="search-container">
@@ -27,7 +27,6 @@
                     </form>
                 </div>
             </div>
-            <img src="/1.png" alt="Floating Image 1" class="floating-image" id="image1">
             <img src="/3.png" alt="Floating Image 3" class="floating-image" id="image3">
         
         </header>
@@ -56,7 +55,7 @@
                         <span>/ 96</span>
                     </div>
                 </div>
-                <p class="community-score-label">Community Score</p>
+                <p class="community-score-label">Security Score</p>
 
             </div>
                 
@@ -102,13 +101,27 @@
         </div>
 
         <!-- Modal for OpenAI Analysis -->
-        <div id="analysis-modal" class="modal">
-            <div class="modal-content">
-                <span id="close-modal" class="close-button">&times;</span>
-                <h2>File Analysis</h2>
-                <p id="analysis-text">Loading...</p>
+<!-- Modal for OpenAI Analysis -->
+<div id="analysis-modal" class="modal">
+    <div class="modal-content">
+        <span id="close-modal" class="close-button">&times;</span>
+        <h2>File Analysis</h2>
+        <div class="modal-cards">
+            <div class="modal-card">
+                <h3>Security Metrics</h3>
+                <p id="security-metrics-text">Loading...</p>
+            </div>
+            <div class="modal-card">
+                <h3>Function Analysis</h3>
+                <p id="function-analysis-text">Loading...</p>
+            </div>
+            <div class="modal-card">
+                <h3>Security Recommendations</h3>
+                <p id="security-recommendations-text">Loading...</p>
             </div>
         </div>
+    </div>
+</div>
     </div>
 
     <script>
@@ -150,6 +163,12 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
 
         if (data.success) {
             // Fetch repository metadata from the GitHub API
+            const securityScore = data.metrics.securityScore || 0;
+
+                        // Update the community score display
+            updateCommunityScore(securityScore);
+            document.getElementById('community-score').innerText = securityScore;
+
             
             header.classList.add('processed');
              
@@ -158,7 +177,6 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
             const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
             const repoData = await repoRes.json();
 
-            const communityScore = data.metrics.communityScore;
 
             window.onload = () => {
     document.querySelectorAll('.floating-image').forEach(image => {
@@ -167,13 +185,11 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
 };
 
             // Update the community score and progress ring
-            updateCommunityScore(communityScore);
 
             // Update the repository title
             document.getElementById('repo-title').innerText = repoData.full_name || 'Unknown Repository';
 
             // Update Community Score
-            document.getElementById('community-score').innerText = data.metrics.securityRating || 0;
 
             // Update Repository URL
             document.getElementById('repo-url').innerText = githubUrl;
@@ -193,31 +209,46 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
 document.getElementById('content-type').innerText = data.metrics.repositoryType || 'Unknown';
 
 // Add explanation for the safety status
-const statusExplanation = document.createElement('p');
-statusExplanation.innerText = `Explanation: ${data.metrics.statusExplanation || 'No explanation available.'}`;
-document.getElementById('content-wrapper').appendChild(statusExplanation);
+// const statusExplanation = document.createElement('p');
+// statusExplanation.innerText = `Explanation: ${data.metrics.statusExplanation || 'No explanation available.'}`;
+// document.getElementById('content-wrapper').appendChild(statusExplanation);
 
 // Update Last Analysis Date
 document.getElementById('last-analysis').innerText = data.metrics.lastAnalysisDate || 'N/A';
 
             // Populate File Analysis Table
             const rows = document.getElementById('file-rows');
-            rows.innerHTML = data.report.map((file, index) => `
-                <tr data-index="${index}">
-                    <td>${file.filePath || 'Unknown'}</td>
-                    <td>${file.filePath.split('.').pop() || 'Unknown'}</td>
-                    <td>${file.analysis ? 'Clean' : 'Skipped'}</td>
-                    <td>${(file.size || 0).toFixed(2)}</td>
-                    <td>${file.language || 'Unknown'}</td>
-                </tr>
-            `).join('');
+            rows.innerHTML = data.report.map((file, index) => {
+                let status = 'Clean';
+                if (file.analysis.includes('potentially hide malicious code')) {
+                    status = 'Risky';
+                }
+                return `
+                    <tr data-index="${index}">
+                        <td>${file.filePath || 'Unknown'}</td>
+                        <td>${file.filePath.split('.').pop() || 'Unknown'}</td>
+                        <td>${status}</td>
+                        <td>${(file.size || 0).toFixed(2)}</td>
+                        <td>${file.language || 'Unknown'}</td>
+                    </tr>
+                `;
+            }).join('');
 
             // Add click event to rows for popup
             rows.querySelectorAll('tr').forEach(row => {
                 row.addEventListener('click', () => {
                     const index = row.getAttribute('data-index');
                     const analysis = data.report[index].analysis || "No analysis available.";
-                    document.getElementById('analysis-text').innerText = analysis;
+
+                    // Split the analysis into sections
+                    const [securityMetrics, functionAnalysis, securityRecommendations] = analysis.split('\n\n');
+
+                    // Populate each modal card with the respective analysis section
+                    document.getElementById('security-metrics-text').innerText = securityMetrics || "No security metrics available.";
+                    document.getElementById('function-analysis-text').innerText = functionAnalysis || "No function analysis available.";
+                    document.getElementById('security-recommendations-text').innerText = securityRecommendations || "No security recommendations available.";
+
+                    // Display the modal
                     document.getElementById('analysis-modal').style.display = 'flex';
                 });
             });
@@ -272,6 +303,23 @@ function updateCommunityScore(score) {
     document.getElementById('community-score').innerText = score;
 }
 
+rows.querySelectorAll('tr').forEach(row => {
+    row.addEventListener('click', () => {
+        const index = row.getAttribute('data-index');
+        const analysis = data.report[index].analysis || "No analysis available.";
+
+        // Split the analysis into sections
+        const [securityMetrics, functionAnalysis, securityRecommendations] = analysis.split('\n\n');
+
+        // Populate each modal card with the respective analysis section
+        document.getElementById('security-metrics-text').innerText = securityMetrics || "No security metrics available.";
+        document.getElementById('function-analysis-text').innerText = functionAnalysis || "No function analysis available.";
+        document.getElementById('security-recommendations-text').innerText = securityRecommendations || "No security recommendations available.";
+
+        // Display the modal
+        document.getElementById('analysis-modal').style.display = 'flex';
+    });
+});
 
 
 

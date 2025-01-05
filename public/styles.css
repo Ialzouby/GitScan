@@ -7,42 +7,41 @@ body {
     color: #fff;
 }
 
+/* Centered Header (Initial State) */
+.header {
+    width: 100%;
+    text-align: center;
+    background: none;
+    transition: all 0.5s ease;
+}
+
+.header.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Header Positioned at the Top (After Form Submission) */
+.header:not(.centered) {
+    position: static;
+    transform: none;
+    background: #1e1e1e;
+    padding: 10px 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    height: 80px;
+    border-radius: 10px;
+    width: 97%;
+
+}
+
 .app-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* Header Section */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
 
-.header-left {
-    flex: 2;
-    height: 100px;
-}
-
-.header h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-#analyze-form {
-    display: flex;
-    gap: 10px;
-}
-
-#github-url {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-}
 
 button {
     padding: 10px 20px;
@@ -58,11 +57,7 @@ button:hover {
     background-color: #948bfc;
 }
 
-.header-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
+
 
 .score-card {
     background: #1E1E1E;
@@ -160,6 +155,7 @@ button:hover {
     background: rgba(0, 0, 0, 0.7);
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
 .modal-content {
@@ -167,9 +163,25 @@ button:hover {
     padding: 20px;
     border-radius: 8px;
     text-align: center;
-    width: 50%;
+    width: 70%;
     color: white;
+    z-index: 1001;
 }
+
+.modal-cards {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.modal-card {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #393838;
+    border-radius: 5px;
+    background-color: #1e1e1e;
+}
+
 
 #close-modal {
     position: absolute;
@@ -283,62 +295,14 @@ body {
 
 
 
-/* Centered Header (Initial State) */
-.header {
-    width: 100%;
-    text-align: center;
-    background: none;
-    transition: all 0.5s ease;
-}
 
-.header.centered {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
 
-/* Header Positioned at the Top (After Form Submission) */
-.header:not(.centered) {
-    position: static;
-    transform: none;
-    background: #1e1e1e;
-    padding: 10px 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    height: 80px;
-    border-radius: 10px;
-}
 
-/* Input Form */
-#analyze-form {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin: 20px 0;
-}
 
-#github-url {
-    flex: 1;
-    max-width: 500px;
-    padding: 15px;
-    border: 2px solid #5e5ce6;
-    border-radius: 30px;
-    background: #1a1a2e;
-    color: #ffffff;
-    font-size: 16px;
-    box-shadow: 0px 0px 15px rgba(94, 92, 230, 0.5);
-    outline: none;
-    transition: 0.3s;
-}
 
-#github-url::placeholder {
-    color: #a29bfe;
-}
 
-#github-url:focus {
-    border-color: #7b6ce6;
-    box-shadow: 0px 0px 20px rgba(123, 108, 230, 0.8);
-}
+
+
 
 /* Button */
 button {
@@ -359,17 +323,7 @@ button:hover {
     box-shadow: 0px 0px 30px rgba(123, 108, 230, 1);
 }
 
-/* Placeholder Animation for Modern Touch */
-#github-url::placeholder {
-    font-style: italic;
-    font-size: 14px;
-    color: #7f7f99;
-    transition: color 0.5s ease;
-}
 
-#github-url:hover::placeholder {
-    color: #a29bfe;
-}
 
 /* Futuristic Glow */
 input, button {
@@ -670,7 +624,7 @@ input, button {
 }
 
 #image3 {
-    bottom: 205%;
+    bottom: 150%;
     left: 40%;
     animation-delay: 4s;
     width: 150px;
@@ -689,37 +643,8 @@ input, button {
     }
 }
 
-.header-text {
-    font-size: 24px;
-    font-weight: bold;
-    color: #fcfcfc;
-    display: block;
-    margin-right: 170px;
-    margin-top: -15px;
-}
 
-/* Header Section */
-.header {
-    display: flex;
-    flex-direction: column; /* Stack the text and the search bar */
-    align-items: center;
-    margin-bottom: 20px;
-}
 
-.header-left {
-    display: flex;
-    flex-direction: column; /* Stack the header text and form container */
-    align-items: center;
-    width: 100%; /* Ensure it spans full width */
-}
-
-/* Header Text Above Search Bar */
-.header-text {
-    font-size: 24px;
-    font-weight: bold;
-    color: #fcfcfc;
-    margin-bottom: 15px; /* Add spacing below the text */
-}
 
 /* Flex Container for Search Bar and Logo */
 .search-container {
@@ -751,6 +676,7 @@ input, button {
     width: 100%; /* Ensure the form spans full width */
 }
 
+
 /* Input Field */
 #github-url {
     flex-grow: 1;
@@ -764,15 +690,6 @@ input, button {
     outline: none;
     transition: 0.3s;
     max-width: 700px; /* Adjust maximum width of the input field */
-}
-
-#github-url::placeholder {
-    color: #a29bfe;
-}
-
-#github-url:focus {
-    border-color: #7b6ce6;
-    box-shadow: 0px 0px 20px rgba(123, 108, 230, 0.8);
 }
 
 

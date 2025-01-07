@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+    <div id="flash-message" class="flash-message">We are currently experiencing high traffic rates, and this may delay processing your request.</div>
+
     <div class="app-container">
         <!-- Header with the search bar -->
         <header id="header" class="header centered">
@@ -19,6 +21,7 @@
                 <div class="search-container">
                     <!-- Logo -->
                     <img src="/3.png" alt="GitScan Logo" id="gitscan-logo" class="hidden-logo">
+
                     
                     <!-- Search Form -->
                     <form id="analyze-form">
@@ -125,6 +128,15 @@
     </div>
 
     <script>
+
+window.onload = () => {
+            const flashMessage = document.getElementById('flash-message');
+            flashMessage.style.display = 'block';  // Show the flash message
+            setTimeout(() => {
+                flashMessage.style.display = 'none'; // Hide the flash message after 4 seconds
+            }, 4000);
+        };
+
 document.getElementById('analyze-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -137,6 +149,10 @@ document.getElementById('analyze-form').addEventListener('submit', async (e) => 
         image.style.display = 'none';
     });
     const gitscanLogo = document.getElementById('gitscan-logo');
+    const flashMessage = document.getElementById('flash-message');
+    // Display the flash message when form is submitted
+    flashMessage.style.display = 'block';  // Show flash message about potential delay
+
 
     const githubUrl = document.getElementById('github-url').value;
     const repoMatch = /github\.com\/([^\/]+)\/([^\/]+)/.exec(githubUrl);
@@ -320,6 +336,7 @@ rows.querySelectorAll('tr').forEach(row => {
         document.getElementById('analysis-modal').style.display = 'flex';
     });
 });
+
 
 
 
